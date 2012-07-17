@@ -277,6 +277,9 @@ class Soulmate
   setTypes: (types) ->
     @types = types
 
+  setMaxResults: (maxResults) ->
+    @maxResults = maxResults
+
 $.fn.soulmate = (options) ->
   new Soulmate($(this), options)
 

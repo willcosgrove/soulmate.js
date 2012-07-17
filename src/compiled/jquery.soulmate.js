@@ -1,59 +1,47 @@
 (function() {
-  var $, Query, Soulmate, Suggestion, SuggestionCollection,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
+  var $, Query, Soulmate, Suggestion, SuggestionCollection;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   $ = jQuery;
-
   Query = (function() {
-
     function Query(minLength) {
       this.minLength = minLength;
       this.value = '';
       this.lastValue = '';
       this.emptyValues = [];
     }
-
     Query.prototype.getValue = function() {
       return this.value;
     };
-
     Query.prototype.setValue = function(newValue) {
       this.lastValue = this.value;
       return this.value = newValue;
     };
-
     Query.prototype.hasChanged = function() {
       return !(this.value === this.lastValue);
     };
-
     Query.prototype.markEmpty = function() {
       return this.emptyValues.push(this.value);
     };
-
     Query.prototype.willHaveResults = function() {
       return this._isValid() && !this._isEmpty();
     };
-
     Query.prototype._isValid = function() {
       return this.value.length >= this.minLength;
     };
-
     Query.prototype._isEmpty = function() {
       var empty, _i, _len, _ref;
       _ref = this.emptyValues;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         empty = _ref[_i];
-        if (this.value.slice(0, empty.length) === empty) return true;
+        if (this.value.slice(0, empty.length) === empty) {
+          return true;
+        }
       }
       return false;
     };
-
     return Query;
-
   })();
-
   Suggestion = (function() {
-
     function Suggestion(index, term, data, type) {
       this.term = term;
       this.data = data;
@@ -61,40 +49,30 @@
       this.id = "" + index + "-soulmate-suggestion";
       this.index = index;
     }
-
     Suggestion.prototype.select = function(callback) {
       return callback(this.term, this.data, this.type, this.index, this.id);
     };
-
     Suggestion.prototype.focus = function() {
       return this.element().addClass('focus');
     };
-
     Suggestion.prototype.blur = function() {
       return this.element().removeClass('focus');
     };
-
     Suggestion.prototype.render = function(callback) {
       return "<li id=\"" + this.id + "\" class=\"soulmate-suggestion\">\n  " + (callback(this.term, this.data, this.type, this.index, this.id)) + "\n</li>";
     };
-
     Suggestion.prototype.element = function() {
       return $('#' + this.id);
     };
-
     return Suggestion;
-
   })();
-
   SuggestionCollection = (function() {
-
     function SuggestionCollection(renderCallback, selectCallback) {
       this.renderCallback = renderCallback;
       this.selectCallback = selectCallback;
       this.focusedIndex = -1;
       this.suggestions = [];
     }
-
     SuggestionCollection.prototype.update = function(results) {
       var i, result, type, typeResults, _results;
       this.suggestions = [];
@@ -115,7 +93,6 @@
       }
       return _results;
     };
-
     SuggestionCollection.prototype.blurAll = function() {
       var suggestion, _i, _len, _ref, _results;
       this.focusedIndex = -1;
@@ -127,7 +104,6 @@
       }
       return _results;
     };
-
     SuggestionCollection.prototype.render = function() {
       var h, suggestion, type, _i, _len, _ref;
       h = '';
@@ -137,7 +113,9 @@
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           suggestion = _ref[_i];
           if (suggestion.type !== type) {
-            if (type !== null) h += this._renderTypeEnd(type);
+            if (type !== null) {
+              h += this._renderTypeEnd(type);
+            }
             type = suggestion.type;
             h += this._renderTypeStart();
           }
@@ -147,11 +125,9 @@
       }
       return h;
     };
-
     SuggestionCollection.prototype.count = function() {
       return this.suggestions.length;
     };
-
     SuggestionCollection.prototype.focus = function(i) {
       if (i < this.count()) {
         this.blurAll();
@@ -163,50 +139,38 @@
         }
       }
     };
-
     SuggestionCollection.prototype.focusElement = function(element) {
       var index;
       index = parseInt($(element).attr('id'));
       return this.focus(index);
     };
-
     SuggestionCollection.prototype.focusNext = function() {
       return this.focus(this.focusedIndex + 1);
     };
-
     SuggestionCollection.prototype.focusPrevious = function() {
       return this.focus(this.focusedIndex - 1);
     };
-
     SuggestionCollection.prototype.selectFocused = function() {
       if (this.focusedIndex >= 0) {
         return this.suggestions[this.focusedIndex].select(this.selectCallback);
       }
     };
-
     SuggestionCollection.prototype.allBlured = function() {
       return this.focusedIndex === -1;
     };
-
     SuggestionCollection.prototype._renderTypeStart = function() {
       return "<li class=\"soulmate-type-container\">\n  <ul class=\"soulmate-type-suggestions\">";
     };
-
     SuggestionCollection.prototype._renderTypeEnd = function(type) {
       return "  </ul>\n  <div class=\"soulmate-type\">" + type + "</div>\n</li>";
     };
-
     SuggestionCollection.prototype._renderSuggestion = function(suggestion) {
       return suggestion.render(this.renderCallback);
     };
-
     return SuggestionCollection;
-
   })();
-
   Soulmate = (function() {
     var KEYCODES;
-
     KEYCODES = {
       9: 'tab',
       13: 'enter',
@@ -214,7 +178,6 @@
       38: 'up',
       40: 'down'
     };
-
     function Soulmate(input, options) {
       var maxResults, minQueryLength, renderCallback, selectCallback, that, timeout, types, url;
       this.input = input;
@@ -248,7 +211,6 @@
         return that.suggestions.blurAll();
       });
     }
-
     Soulmate.prototype.handleKeydown = function(event) {
       var killEvent;
       killEvent = true;
@@ -261,7 +223,9 @@
           break;
         case 'enter':
           this.suggestions.selectFocused();
-          if (this.suggestions.allBlured()) killEvent = false;
+          if (this.suggestions.allBlured()) {
+            killEvent = false;
+          }
           break;
         case 'up':
           this.suggestions.focusPrevious();
@@ -277,7 +241,6 @@
         return event.preventDefault();
       }
     };
-
     Soulmate.prototype.handleKeyup = function(event) {
       this.query.setValue(this.input.val());
       if (this.query.hasChanged()) {
@@ -289,26 +252,23 @@
         }
       }
     };
-
     Soulmate.prototype.hideContainer = function() {
       this.suggestions.blurAll();
       this.container.hide();
       return $(document).unbind('click.soulmate');
     };
-
     Soulmate.prototype.showContainer = function() {
-      var _this = this;
       this.container.show();
-      return $(document).bind('click.soulmate', function(event) {
-        if (!_this.container.has($(event.target)).length) {
-          return _this.hideContainer();
+      return $(document).bind('click.soulmate', __bind(function(event) {
+        if (!this.container.has($(event.target)).length) {
+          return this.hideContainer();
         }
-      });
+      }, this));
     };
-
     Soulmate.prototype.fetchResults = function() {
-      var _this = this;
-      if (this.xhr != null) this.xhr.abort();
+      if (this.xhr != null) {
+        this.xhr.abort();
+      }
       return this.xhr = $.ajax({
         url: this.url,
         dataType: 'jsonp',
@@ -319,12 +279,11 @@
           types: this.types,
           limit: this.maxResults
         },
-        success: function(data) {
-          return _this.update(data.results);
-        }
+        success: __bind(function(data) {
+          return this.update(data.results);
+        }, this)
       });
     };
-
     Soulmate.prototype.update = function(results) {
       this.suggestions.update(results);
       if (this.suggestions.count() > 0) {
@@ -335,24 +294,21 @@
         return this.hideContainer();
       }
     };
-
     Soulmate.prototype.setTypes = function(types) {
       return this.types = types;
     };
-
+    Soulmate.prototype.setMaxResults = function(maxResults) {
+      return this.maxResults = maxResults;
+    };
     return Soulmate;
-
   })();
-
   $.fn.soulmate = function(options) {
     return new Soulmate($(this), options);
   };
-
   window._test = {
     Query: Query,
     Suggestion: Suggestion,
     SuggestionCollection: SuggestionCollection,
     Soulmate: Soulmate
   };
-
 }).call(this);
